@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.org.mapper.RetailBusinessInfoMapper">
+    
+	<sql id="retailBusinessInfoColumns">
+		a.business_id AS "id",
+		a.business_name AS "businessName",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.login_user AS "loginUser",
+		a.login_pass AS "loginPass",
+		a.lead_name AS "leadName",
+		a.lead_phone AS "leadPhone",
+		a.lead_email AS "leadEmail",
+		a.province_id AS "provinceId",
+		a.city_id AS "cityId",
+		a.district_id AS "districtId",
+		a.business_address AS "businessAddress",
+		a.business_describe AS "businessDescribe",
+		a.contract_no AS "contractNo",
+		a.contract_date AS "contractDate",
+		a.create_time AS "createTime",
+		a.del_flg AS "delFlg"
+	</sql>
+	
+	<sql id="retailBusinessInfoJoins">
+		
+	</sql>
+	
+	<select id="findBusinessInfo" resultType="RetailBusinessInfo" >
+		SELECT 
+			<include refid="retailBusinessInfoColumns"/>
+		FROM retail_business_info a 
+		ORDER BY createTime DESC 
+	</select>
+    
+	<select id="get" resultType="RetailBusinessInfo" >
+		SELECT 
+			<include refid="retailBusinessInfoColumns"/>
+		FROM retail_business_info a
+		<include refid="retailBusinessInfoJoins"/>
+		WHERE a.business_id = #{id}
+		ORDER BY createTime DESC 
+	</select>
+	
+	<select id="findList" resultType="RetailBusinessInfo" >
+		SELECT 
+			<include refid="retailBusinessInfoColumns"/>
+		FROM retail_business_info a
+		<include refid="retailBusinessInfoJoins"/>
+		<where>
+			
+			${dataScope}
+			<if test="businessName != null and businessName != ''">
+				AND a.business_name like concat('%',#{businessName},'%')
+			</if>
+			<if test="leadName != null and leadName != ''">
+				AND a.lead_name like concat('%',#{leadName},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY createTime DESC 
+	</select>
+	
+	<select id="findAllList" resultType="RetailBusinessInfo" >
+		SELECT 
+			<include refid="retailBusinessInfoColumns"/>
+		FROM retail_business_info a
+		<include refid="retailBusinessInfoJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY createTime DESC 
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_business_info(
+			business_id,
+			business_name,
+			parent_id,
+			parent_ids,
+			login_user,
+			login_pass,
+			lead_name,
+			lead_phone,
+			lead_email,
+			province_id,
+			city_id,
+			<if test="districtId != null and districtId != ''">
+			district_id,
+			</if>
+			business_address,
+			business_describe,
+			contract_no,
+			contract_date,
+			create_time,
+			del_flg
+		) VALUES (
+			#{businessId},
+			#{businessName},
+			#{parent.id},
+			#{parentIds},
+			#{loginUser},
+			#{loginPass},
+			#{leadName},
+			#{leadPhone},
+			#{leadEmail},
+			#{provinceId},
+			#{cityId},
+			<if test="districtId != null and districtId != ''">
+			#{districtId},
+			</if>
+			#{businessAddress},
+			#{businessDescribe},
+			#{contractNo},
+			#{contractDate},
+			#{createTime},
+			#{delFlg}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_business_info SET 	
+
+			business_name = #{businessName},
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds},
+			login_user = #{loginUser},
+			login_pass = #{loginPass},
+			lead_name = #{leadName},
+			lead_phone = #{leadPhone},
+			lead_email = #{leadEmail},
+			province_id = #{provinceId},
+			city_id = #{cityId},
+			<if test="districtId != null and districtId != ''">
+			district_id = #{districtId},
+			</if>
+			business_address = #{businessAddress},
+			business_describe = #{businessDescribe},
+			contract_no = #{contractNo},
+			contract_date = #{contractDate},
+			create_time = #{createTime},
+			del_flg = #{delFlg}
+		WHERE business_id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_business_info
+		WHERE business_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_business_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE business_id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailBusinessInfo" statementType="STATEMENT">
+		select * FROM retail_business_info  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.OrderInfoMapper">
+
+
+	<resultMap type="com.jeeplus.modules.sys.entity.OrderInfo" id="orderInfo">
+	
+		<id column="order_sn" property="orderSn"/>
+		<result property="goodsName" column="goods_name" />
+		<result property="goodsPrice" column="goods_price" />
+		<result property="rfidCode" column="rfid_code" />
+		<result property="businessId" column="business_id" />
+		<result property="businessName" column="business_name" />
+		<result property="regionId" column="region_id" />
+		<result property="regionName" column="region_name" />
+		<result property="positionId" column="position_id" />
+		<result property="positionName" column="position_name" />
+		<result property="derviceSn" column="dervice_sn" />
+		<result property="derviceName" column="dervic_name" />
+		<result property="fromDervice" column="from_dervice" />
+		<result property="fromDerviceName" column="from_dervice_name" />
+		<result property="userId" column="user_id" />
+		<result property="mobilePhone" column="mobile_phone" />
+		<result property="orderPrice" column="order_price" />
+		<result property="orderStatus" column="order_status" />
+		
+		<result property="orderTime" column="order_time" />
+		<result property="refundStatus" column="refund_status" />
+		<result property="refundStatusName" column="refund_status_name" />
+		<result property="refundTime" column="refund_time" />
+		<result property="payType" column="pay_type" />
+		
+		<result property="payStatus" column="pay_status" />
+	
+		<result property="payTime" column="pay_time" />
+		<result property="tradeNo" column="trade_no" />
+		<result property="discountFlg" column="discount_flg" />
+		<result property="discountFlgName" column="discount_flg_name" />
+		<result property="discountId" column="discount_id" />
+		<result property="discountName" column="discount_name" />
+		<result property="payPrice" column="pay_price" />
+		<result property="isSharding" column="is_sharding" />
+		<result property="isShardingName" column="is_sharding_name" />
+		<result property="createDate" column="create_time" />
+		<result property="detailId" column="detail_id" />
+	
+			
+		<collection column="order_sn" property="detailList" ofType="com.jeeplus.modules.sys.entity.OrderDetail" select="selectOrderDeatils"> 
+			 <id column="detail_id" property="detailId"/>
+			 <result column="order_sn" property="orderSn"/>
+			 <result column="goods_id" property="goodsId"/>
+			 <result column="goods_sn" property="goodsSn"/>
+			 <result column="goods_name" property="goodsName"/>
+			 <result column="goods_image" property="goodsImage"/>
+			 <result column="goods_price" property="goodsPrice"/>
+			 <result column="rfid_id" property="rfidId"/>
+			 <result column="rfid_code" property="rfidCode"/>
+	 	</collection>
+	 	
+	 	
+	</resultMap>
+
+
+
+	
+	    <!-- 设备类型 -->
+    <sql id="orderjoins">
+    	INNER JOIN retail_business_info g ON g.business_id = a.business_id
+    	INNER JOIN retail_user_info retailUserInfo	ON retailUserInfo.user_id = a.user_id
+    	INNER JOIN retail_dervice_info retailDerviceInfo	ON retailDerviceInfo.dervice_sn = a.dervice_sn	
+		INNER JOIN retail_position_info positionInfo ON positionInfo.position_id = a.position_id
+		INNER JOIN retail_region_info regionInfo ON regionInfo.region_id = a.region_id
+		<!-- LEFT JOIN retail_order_detail orderDetail ON orderDetail.order_sn = a.order_sn  -->
+	</sql>
+	
+	<select id="get" resultMap="orderInfo">
+		SELECT *
+		FROM retail_order_info a
+		<include refid="orderjoins" />
+		WHERE a.order_sn = #{orderSn}
+	</select>
+	
+	<select id="selectOrderDeatils" parameterType="java.lang.String" resultType="com.jeeplus.modules.sys.entity.OrderDetail">
+		SELECT *
+		FROM retail_order_detail a
+		WHERE a.order_sn = #{orderSn}
+	</select>
+    
+
+
+
+    <sql id="queryColumns">
+		a.order_sn id,
+		a.order_sn orderSn,
+		a.business_id,
+		g.business_name,
+		a.region_id,
+		a.position_id,
+		a.dervice_sn,
+		retailDerviceInfo.dervice_name,
+		
+		a.from_dervice,
+		if(a.from_dervice = 1,'无人店','其他设备') from_dervice_name,
+		a.user_id,
+		retailUserInfo.mobile_phone,
+		a.order_price,
+		a.order_status,
+		
+		a.order_time,
+		a.refund_status,
+		<!-- if(a.refund_status = 1,'未退款','已退款') refund_status_name, -->
+		a.refund_time,
+		a.pay_type,
+		a.pay_status,
+		
+		a.pay_time,
+		a.trade_no,
+		a.discount_flg,
+		if(a.discount_flg = 0,'未使用','已使用') discount_flg_name,
+		a.discount_id,
+		a.discount_name,
+		a.pay_price,
+		a.is_sharding,
+		if(a.is_sharding = 0,'不分账','分账') is_sharding_name,
+		a.create_time,
+		positionInfo.position_name,
+		regionInfo.region_name
+		<!-- 
+		,
+		
+		orderDetail.detail_id,
+		orderDetail.goods_name,
+		orderDetail.goods_price,
+		orderDetail.rfid_code -->
+	</sql>
+    
+
+	<select id="findList" parameterType="String" resultMap="orderInfo">  
+        select 
+		<include refid="queryColumns"/>
+		from retail_order_info a 
+		<include refid="orderjoins"/> 
+		where  a.del_flg != #{DEL_FLAG_DELETE} 
+			<if test="orderSn != null and orderSn != ''">
+					AND a.order_sn like concat('%',#{orderSn},'%')
+			</if>
+			<if test="mobilePhone != null and mobilePhone != ''">
+					AND retailUserInfo.mobile_phone like concat('%',#{mobilePhone},'%')
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null ">
+				AND a.order_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+			${dataScope}
+		ORDER BY a.create_time desc 
+    </select> 
+
+
+
+
+
+
+
+
+
+
+    
+	
+</mapper>

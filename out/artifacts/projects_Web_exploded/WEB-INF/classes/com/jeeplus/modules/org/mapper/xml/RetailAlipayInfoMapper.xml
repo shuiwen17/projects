@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.org.mapper.RetailAlipayInfoMapper">
+    
+    <sql id="dataColumns">			
+		a.account_id AS "id",
+		a.partner_id AS "partnerId",
+		a.app_id AS "appId",
+		a.private_key AS "privateKey",
+		a.public_key AS "publicKey",
+		a.alipublic_key AS "alipublicKey",
+		a.account_key AS "accountKey",
+		a.business_id AS "businessId", 
+		b.business_name AS "businessName",
+		a.create_time AS "createDate",
+		a.del_flg AS "delFlag"
+	</sql>
+    
+	<sql id="retailJoins"> 
+		INNER JOIN retail_business_info b ON a.business_id= b.business_id
+	</sql>
+	
+	<select id="findList" resultType="RetailAlipayInfo" >
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_alipay_info a
+	</select> 
+	<select id="getBybusinessId" resultType="RetailAlipayInfo">
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_alipay_info a
+			<include refid="retailJoins"/>
+		WHERE 	a.business_id = #{businessId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_alipay_info(   
+			partner_id,
+			app_id,
+			private_key,
+			public_key,
+			alipublic_key,
+			account_key,
+			business_id, 
+			create_time,
+			del_flg
+		) VALUES ( 
+			#{partnerId},
+			#{appId},
+			#{privateKey},
+			#{publicKey},
+			#{alipublicKey},
+			#{accountKey},
+			#{businessId}, 
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_alipay_info SET  	  
+			partner_id=#{partnerId},
+			app_id=#{appId},
+			private_key=#{privateKey},
+			public_key=#{publicKey},
+			alipublic_key=#{alipublicKey},
+			account_key=#{accountKey},
+			business_id=#{businessId}
+		WHERE account_id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_alipay_info
+		WHERE business_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_alipay_info SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE business_id = #{ids}
+	</update>	
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailAlipayInfo" statementType="STATEMENT">
+		select * FROM retail_alipay_info  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.marketing.mapper.RetailUserInfoMapper">
+    
+	<sql id="retailUserInfoColumns">
+		a.user_id AS "user.id",
+		a.client_id AS "clientId",
+		a.reg_type AS "regType",
+		a.user_name AS "userName",
+		a.mobile_phone AS "mobilePhone",
+		a.business_id AS "businessId",
+		a.region_id AS "regionId",
+		a.position_id AS "positionId",
+		a.dervice_sn AS "derviceSn",
+		a.create_time AS "createTime",
+		a.del_flg AS "delFlg",
+		user.name AS "user.name",
+		rus.sign_no as "signNo",
+		rus.create_time as "signTime"
+	</sql>
+	
+	<sql id="retailUserInfoJoins">
+		INNER JOIN retail_business_info g on a.business_id = g.business_id 
+		left join retail_user_sign rus on a.client_id = rus.client_id
+		LEFT JOIN sys_user user ON user.id = a.user_id	
+	</sql>
+	
+    
+	<select id="get" resultType="RetailUserInfo" >
+		SELECT 
+			<include refid="retailUserInfoColumns"/>
+		FROM retail_user_info a
+		<include refid="retailUserInfoJoins"/>
+		WHERE a.id = #{id} ORDER BY createTime DESC 
+	</select>
+	
+	<select id="findList" resultType="RetailUserInfo" >
+		SELECT 
+			<include refid="retailUserInfoColumns"/>
+		FROM retail_user_info a
+		<include refid="retailUserInfoJoins"/>
+		<where>
+			
+			${dataScope}
+			<if test="mobilePhone != null and mobilePhone != ''">
+				AND a.mobile_phone LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobilePhone}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobilePhone}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobilePhone},'%')</if>
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null ">
+				AND a.create_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY createTime DESC 
+	</select>
+	
+	<select id="findAllList" resultType="RetailUserInfo" >
+		SELECT 
+			<include refid="retailUserInfoColumns"/>
+		FROM retail_user_info a
+		<include refid="retailUserInfoJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY createTime DESC 
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_user_info(
+			user_id,
+			client_id,
+			reg_type,
+			user_name,
+			mobile_phone,
+			business_id,
+			region_id,
+			position_id,
+			dervice_sn,
+			create_time,
+			del_flg
+		) VALUES (
+			#{user.id},
+			#{clientId},
+			#{regType},
+			#{userName},
+			#{mobilePhone},
+			#{businessId},
+			#{regionId},
+			#{positionId},
+			#{derviceSn},
+			#{createTime},
+			#{delFlg}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_user_info SET 	
+			user_id = #{user.id},
+			client_id = #{clientId},
+			reg_type = #{regType},
+			user_name = #{userName},
+			mobile_phone = #{mobilePhone},
+			business_id = #{businessId},
+			region_id = #{regionId},
+			position_id = #{positionId},
+			dervice_sn = #{derviceSn},
+			create_time = #{createTime},
+			del_flg = #{delFlg}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_user_info
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_user_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailUserInfo" statementType="STATEMENT">
+		select * FROM retail_user_info  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

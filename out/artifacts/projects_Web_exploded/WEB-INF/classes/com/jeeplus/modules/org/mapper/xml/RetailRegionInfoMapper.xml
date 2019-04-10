@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.org.mapper.RetailRegionInfoMapper">
+    
+    <sql id="dataColumns">			
+		a.region_id AS "id",
+		a.region_name AS "regionName",
+		a.business_id AS "businessId",
+		a.manager_id AS "managerId",
+		a.region_describe AS "regionDescribe", 
+		a.create_time AS "createDate",
+		a.del_flag AS "delFlag",
+		c.manager_name AS "managerName",
+		b.business_name AS "businessName"
+	</sql>
+    
+	<sql id="retailJoins">
+		inner join retail_business_info b on a.business_id=b.business_id 
+		inner join retail_region_manager c on a.manager_id = c.manager_id
+	</sql>
+	
+	<select id="findList" resultType="RetailRegionInfo" >
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_region_info a
+		<include refid="retailJoins"/>
+		<where>
+			${dataScope}
+			<if test="regionName != null and regionName != ''">
+				AND a.region_name like concat('%',#{regionName},'%')
+			</if>
+			<if test="businessName != null and businessName != ''">
+				AND b.business_Name like concat('%',#{businessName},'%')
+			</if> 
+			<if test="managerName != null and managerName != ''">
+				AND c.manager_name like concat('%',#{managerName},'%')
+			</if> 
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select> 
+	<select id="get" resultType="RetailRegionInfo">
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_region_info a
+			<include refid="retailJoins"/>
+		WHERE 	region_id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_region_info(  
+			region_name,
+			business_id,
+			manager_id,
+			region_describe, 
+			create_time,
+			del_flag
+		) VALUES (
+			#{regionName},
+			#{businessId},
+			#{managerId},
+			#{regionDescribe},
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_region_info SET 	 
+			region_name = #{regionName},
+			business_id = #{businessId},
+			manager_id  = #{managerId},
+			region_describe = #{regionDescribe}
+		WHERE region_id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_region_info
+		WHERE region_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_region_info SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE region_id = #{ids}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailRegionInfo" statementType="STATEMENT">
+		select * FROM retail_region_info  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

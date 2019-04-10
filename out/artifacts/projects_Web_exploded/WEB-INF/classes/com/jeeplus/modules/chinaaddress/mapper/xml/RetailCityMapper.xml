@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.chinaaddress.mapper.RetailCityMapper">
+    
+    
+    <sql id="cityColumns">
+		 a.CID as cid,
+		 a.CityName as cityName,
+		 a.code_p as codeP,
+		 a.code_c as codeC
+	</sql>
+	 
+	<select id="findCitysByPid" resultType="RetailCity" >
+		SELECT 
+			<include refid="cityColumns"/>
+		FROM retail_city a 
+		WHERE a.code_p=#{codeP} 
+	</select>
+    
+    
+	<sql id="retailCityColumns">
+		a.cid AS "cid",
+		a.cityname AS "cityname",
+		a.code_p AS "codeP",
+		a.code_c AS "codeC"
+	</sql>
+	
+	<sql id="retailCityJoins">
+		
+	</sql>
+	
+    
+	<select id="get" resultType="RetailCity" >
+		SELECT 
+			<include refid="retailCityColumns"/>
+		FROM retail_city a
+		<include refid="retailCityJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="RetailCity" >
+		SELECT 
+			<include refid="retailCityColumns"/>
+		FROM retail_city a
+		<include refid="retailCityJoins"/>
+		<where>
+			
+			${dataScope}
+			
+			<if test="cityname != null and cityname != ''">
+				AND a.cityname = #{cityname}
+			</if>
+			<if test="codeP != null and codeP != ''">
+				AND a.code_p = #{codeP}
+			</if>
+			<if test="codeC != null and codeC != ''">
+				AND a.code_c = #{codeC}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="RetailCity" >
+		SELECT 
+			<include refid="retailCityColumns"/>
+		FROM retail_city a
+		<include refid="retailCityJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_city(
+			CID,
+			CityName,
+			code_p,
+			code_c
+		) VALUES (
+			#{cid},
+			#{cityname},
+			#{codeP},
+			#{codeC}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_city SET 	
+			CID = #{cid},
+			cityname = #{cityname},
+			code_p = #{codeP},
+			code_c = #{codeC}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_city
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_city SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailCity" statementType="STATEMENT">
+		select * FROM retail_city  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

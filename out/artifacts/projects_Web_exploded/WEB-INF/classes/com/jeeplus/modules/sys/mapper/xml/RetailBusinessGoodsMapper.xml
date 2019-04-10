@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.RetailBusinessGoodsMapper">
+    
+	<sql id="retailBusinessGoodsColumns">
+		a.id AS "id",
+		a.business_id AS "businessId",
+		a.business_name AS "businessName",
+		a.goods_id AS "goodsId",
+		a.goods_name AS "goodsName",
+		a.goods_price AS "goodsPrice",
+		a.goods_image AS "goodsImage",
+		a.goods_describe AS "goodsDescribe",
+		a.create_time AS "createTime",
+		a.del_flg AS "delFlg"
+	</sql>
+	
+	<sql id="retailBusinessGoodsJoins">
+		LEFT JOIN retail_business_info business ON business.business_id = a.business_id		
+	</sql>
+	
+    
+	<select id="get" resultType="RetailBusinessGoods" >
+		SELECT 
+			<include refid="retailBusinessGoodsColumns"/>
+		FROM retail_business_goods a
+		<include refid="retailBusinessGoodsJoins"/>
+		WHERE a.id = #{id} 			
+			
+	</select>
+	
+	<select id="findList" resultType="RetailBusinessGoods" >
+		SELECT 
+			<include refid="retailBusinessGoodsColumns"/>
+		FROM retail_business_goods a
+		<include refid="retailBusinessGoodsJoins"/>
+		<where>
+			a.del_flg != #{DEL_FLAG_DELETE}
+			${dataScope}
+			<if test="businessName != null and businessName != ''">
+				AND a.business_name like concat('%',#{businessName},'%')
+			</if>
+			<if test="goodsName != null and goodsName != ''">
+				AND a.goods_name like concat('%',#{goodsName},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="RetailBusinessInfo" >
+		SELECT 
+			<include refid="retailBusinessGoodsColumns"/>
+		FROM retail_business_goods a
+		<include refid="retailBusinessGoodsJoins"/>
+		<where>
+			a.del_flg != #{DEL_FLAG_DELETE}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_business_goods( 
+			business_id,
+			business_name,
+			goods_id,
+			goods_name,
+			goods_price,
+			goods_image,
+			goods_describe,
+			create_time,
+			del_flg
+		) VALUES (
+			#{businessId},
+			#{businessName},
+			#{goodsId},
+			#{goodsName},
+			#{goodsPrice},
+			#{goodsImage},
+			#{goodsDescribe}, 
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_business_goods SET 	 
+			business_id = #{businessId},
+			business_name =#{businessName},
+			goods_id= #{goodsId},
+			goods_name =#{goodsName},
+			goods_price =#{goodsPrice},
+			goods_image =#{goodsImage}, 
+			goods_describe =#{goodsDescribe}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		UPDATE retail_business_goods SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE  id = #{id} 
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_business_goods SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailBusinessGoods" statementType="STATEMENT">
+		select * FROM retail_business_goods  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

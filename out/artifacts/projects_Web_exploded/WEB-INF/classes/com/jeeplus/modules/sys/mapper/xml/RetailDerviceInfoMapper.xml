@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.RetailDerviceInfoMapper">
+    
+    <sql id="queryColumns">
+		a.dervice_sn id,
+		a.dervice_sn derviceSn,
+		a.dervice_name,
+		a.business_id,
+		business.business_name,
+		a.type_id,
+		a.region_id,
+		a.position_id,
+		a.dervice_state,
+		if(a.dervice_state = 0,'停用','启用') dervice_state_name,
+		a.longitude,
+		a.latitude,
+		a.dervice_online,
+		if(a.dervice_online = 0,'不在线','在线') dervice_online_name,
+		a.create_time,
+		a.del_flg,
+		retailDerviceType.type_name,
+		positionInfo.position_name,
+		regionInfo.region_name
+	</sql>
+    
+    <resultMap id="queryResult" type="RetailDerviceInfo">
+    	<id property="id" column="id" /> 
+		<result property="derviceSn" column="dervice_sn" />
+		<result property="derviceName" column="dervice_name" />
+		<result property="businessId" column="business_id" />
+		<result property="businessName" column="business_name" />
+		<result property="typeId" column="type_id" />
+		<result property="typeName" column="type_name" />
+		<result property="regionId" column="region_id" />
+		<result property="regionName" column="region_name" />
+		<result property="positionId" column="position_id" />
+		<result property="positionName" column="position_name" />
+		<result property="derviceState" column="dervice_state" />
+		<result property="derviceStateName" column="dervice_state_name" />
+		<result property="derviceOnline" column="dervice_online" />
+		<result property="derviceOnlineName" column="dervice_online_name" />
+		<result property="longitude" column="longitude" />
+		<result property="latitude" column="latitude" />
+		<result property="createDate" column="create_time" />
+    </resultMap>
+    
+    
+    <!-- 设备类型 -->
+    <sql id="joins">
+		LEFT JOIN retail_dervice_type retailDerviceType ON retailDerviceType.type_id = a.type_id
+		LEFT JOIN retail_position_info positionInfo ON positionInfo.position_id = a.position_id
+		LEFT JOIN retail_region_info regionInfo ON regionInfo.region_id = a.region_id
+		LEFT JOIN retail_business_info business ON business.business_id = a.business_id
+	</sql>
+    
+	<select id="findList" parameterType="String" resultMap="queryResult">  
+        select 
+		<include refid="queryColumns"/>
+		from retail_dervice_info a 
+		<include refid="joins"/> 
+		where 
+		
+		a.del_flg != #{DEL_FLAG_DELETE} 
+		${dataScope}
+			<if test="derviceSn != null and derviceSn != ''">
+				AND a.dervice_sn like concat('%',#{derviceSn},'%')
+			</if>
+			<if test="derviceName != null and derviceName != ''">
+				AND a.dervice_name like concat('%',#{derviceName},'%')
+			</if>
+		ORDER BY a.create_time desc 
+    </select> 
+   
+    <select id="get" resultType="RetailDerviceInfo" >
+		SELECT 
+			<include refid="queryColumns"/>
+		FROM retail_dervice_info a
+		<include refid="joins"/> 
+		WHERE a.dervice_sn = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_dervice_info(
+			dervice_sn,
+			dervice_name,
+			business_id,
+			type_id,
+			region_id,
+			position_id,
+			dervice_state,
+			longitude,
+			latitude,
+			dervice_online,
+			create_time,
+			del_flg 
+		) VALUES (
+			#{derviceSn},
+			#{derviceName},
+			#{businessId},
+			#{typeId},
+			#{regionId},
+			#{positionId},
+			#{derviceState},
+			#{longitude},
+			#{latitude},
+			#{derviceOnline},
+			#{createDate},
+			#{DEL_FLAG_NORMAL}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_dervice_info SET 
+			dervice_sn = #{derviceSn},	 
+			dervice_name = #{derviceName},
+			business_id = #{businessId},
+			type_id = #{typeId},
+			region_id =#{regionId},
+			position_id = #{positionId},
+			dervice_state = #{derviceState},
+			longitude = #{longitude},
+			latitude = #{latitude},
+			dervice_online = #{derviceOnline} 
+		WHERE dervice_sn = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_dervice_info SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE dervice_sn = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty"  resultType="RetailDerviceInfo" statementType="STATEMENT">
+		select * from retail_dervice_info where ${propertyName} = '${value}'
+	</select>
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.org.mapper.RetailPositionTypeMapper">
+    
+    <sql id="dataColumns">			
+		a.type_id AS "id",
+		a.type_name AS "typeName",
+		a.type_describe AS "typeDescribe",
+		a.create_time AS "createDate",
+		a.del_flag AS "delFlag"
+	</sql>
+    
+	<sql id="retailJoins">
+		 
+	</sql>
+	
+	<select id="findList" resultType="RetailPositionType" >
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_position_type a
+		<include refid="retailJoins"/>
+		<where>
+			${dataScope}
+			<if test="typeName != null and typeName != ''">
+				AND a.type_name like concat('%',#{typeName},'%')  
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select> 
+	<select id="get" resultType="RetailPositionType">
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_position_type a
+			<include refid="retailJoins"/>
+		WHERE 	type_id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_position_type(  
+			type_name,
+			type_describe,
+			create_time,
+			del_flag
+		) VALUES (
+			#{typeName},
+			#{typeDescribe},
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_position_type SET 	 
+			type_name = #{typeName},
+			type_describe = #{typeDescribe},
+			create_time = #{createDate},
+			del_flag =#{delFlag}
+		WHERE type_id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_position_type
+		WHERE type_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_position_type SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE type_id = #{ids}
+	</update>	
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailPositionType" statementType="STATEMENT">
+		select * FROM retail_position_type  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

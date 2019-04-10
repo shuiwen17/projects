@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.RetailOrderCountMapper">
+
+
+	<resultMap type="com.jeeplus.modules.sys.entity.RetailOrderCount" id="BaseResult">
+		<result property="orderCountDate" column="order_count_date" jdbcType="DATE" />
+		<result property="orderNum" column="order_num" jdbcType="INTEGER" />
+		<result property="orderSale" column="order_sale" jdbcType="DECIMAL"/>
+	</resultMap>
+	<sql id="BaseSQL">
+		order_count_date,order_num,order_sale
+	</sql>
+	<select id="get" resultMap="BaseResult">
+		SELECT
+		<include refid="BaseSQL"/>
+		FROM retail_order_count
+		WHERE retail_order_count.order_count_date = #{orderCountDate} limit 1
+	</select>
+
+	<select id="findList"  resultMap="BaseResult">
+		SELECT
+		<include refid="BaseSQL"/>
+		FROM retail_order_count
+		<where>
+			<if test="orderCountDate != null">
+				retail_order_count.order_count_date = #{orderCountDate}
+			</if>
+		</where>
+		order by retail_order_count.order_count_date desc
+    </select>
+
+	<insert id="insert">
+		insert into retail_order_count(order_count_date,order_num,order_sale)values(#{orderCountDate},#{orderNum},#{orderSale})
+	</insert>
+
+</mapper>

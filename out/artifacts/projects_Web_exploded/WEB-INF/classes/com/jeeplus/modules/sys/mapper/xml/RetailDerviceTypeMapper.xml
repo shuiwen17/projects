@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.RetailDerviceTypeMapper">
+    
+    <sql id="queryColumns">
+		a.type_id id,
+		a.classify_id,
+		b.classify_name,
+		a.brand_name,
+		a.model_name,
+		a.connect_type,
+		if(a.connect_type = '0','工控机','单片机') connect_type_name,
+		a.type_describe,
+		a.type_name,
+		date_format(a.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+		a.del_flag
+	</sql>
+    
+    <resultMap id="queryResult" type="RetailDerviceType">
+    	<id property="id" column="id" />
+		<result property="classifyId" column="classify_id" />
+		<result property="brandName" column="brand_name" />
+		<result property="classifyName" column="classify_name" />
+		<result property="modelName" column="model_name" />
+		<result property="connectType" column="connect_type" />
+		<result property="connectTypeName" column="connect_type_name" />
+		<result property="typeDescribe" column="type_describe" />
+		<result property="typeName" column="type_name" />
+		<result property="createDate" column="create_time" />
+		<result property="delFlag" column="del_flag" />
+    </resultMap>
+    
+	<select id="findList" parameterType="String" resultMap="queryResult">  
+        select 
+		<include refid="queryColumns"/>
+		from retail_dervice_type a
+		left join retail_dervice_classify b ON a.classify_id = b.classify_id
+		where a.del_flag != #{DEL_FLAG_DELETE} 
+			<if test="typeName != null and typeName != ''">
+					AND a.type_name like concat('%',#{typeName},'%')
+			</if>
+		ORDER BY a.create_time desc 
+    </select> 
+    
+    <select id="findRetailDerviceTypes" parameterType="String" resultMap="queryResult">  
+        select 
+		<include refid="queryColumns"/>
+		from retail_dervice_type a 
+    </select> 
+    
+    <select id="get" resultType="RetailDerviceType" >
+		SELECT 
+			<include refid="queryColumns"/>
+		FROM retail_dervice_type a
+		left join retail_dervice_classify b ON a.classify_id = b.classify_id
+		WHERE a.type_id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_dervice_type(
+			classify_id,
+			brand_name,
+			model_name,
+			connect_type,
+			type_describe,
+			type_name,
+			create_time,
+			del_flag 
+		) VALUES (
+			#{classifyId},
+			#{brandName},
+			#{modelName},
+			#{connectType},
+			#{typeDescribe},
+			#{typeName},
+			#{createDate},
+			#{DEL_FLAG_NORMAL}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_dervice_type SET 	
+			classify_id = #{classifyId},
+			brand_name = #{brandName},
+			model_name = #{modelName},
+			connect_type = #{connectType},
+			type_describe = #{typeDescribe},
+			type_name = #{typeName}
+		WHERE type_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_dervice_type SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE type_id = #{id}
+	</update>
+</mapper>

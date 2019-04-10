@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.org.mapper.RetailRegionManagerMapper">
+    
+    <sql id="dataColumns">			
+		a.manager_id AS "id",
+		a.manager_name AS "managerName",
+		a.business_id AS "businessId",
+		a.login_user AS "loginUser",		
+		a.login_pass AS "loginPass",
+		a.manager_tel AS "managerTel",
+		a.validate_code	 AS "validateCode",
+		a.manager_email AS "managerEmail",  
+		a.create_time AS "createDate",
+		a.del_flag AS "delFlag",
+		b.business_name AS "businessName"
+	</sql>
+    
+	<sql id="retailJoins">
+		inner join retail_business_info b on a.business_id=b.business_id  
+	</sql>
+	
+	<select id="findManagerByBid" resultType="RetailRegionManager" >
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_region_manager a 
+		<include refid="retailJoins"/>
+		WHERE a.business_id=#{businessId} 
+	</select>
+	
+	<select id="findList" resultType="RetailRegionManager" >
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_region_manager a
+		<include refid="retailJoins"/>
+		<where>
+			${dataScope}
+			<if test="managerName != null and managerName != ''">
+				AND a.manager_name like concat('%',#{managerName},'%')
+			</if> 
+			<if test="businessName != null and businessName != ''">
+				AND b.business_name like concat('%',#{businessName},'%')
+			</if> 
+			<if test="loginUser != null and loginUser != ''">
+				AND a.login_user like concat('%',#{loginUser},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select> 
+	<select id="get" resultType="RetailRegionManager">
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_region_manager a
+			<include refid="retailJoins"/>
+		WHERE 	manager_id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_region_manager(  
+			manager_name,
+			business_id,
+			login_user,		
+			login_pass,
+			manager_tel,
+			validate_code,
+			manager_email,  
+			create_time,
+			del_flag
+		) VALUES (
+			#{managerName},
+			#{businessId},
+			#{loginUser},
+			#{loginPass},
+			#{managerTel},
+			#{validateCode},
+			#{managerEmail},
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_region_manager SET 	 
+			manager_name = #{managerName},
+			business_id = #{businessId},
+			login_user = #{loginUser},		
+			login_pass = #{loginPass},
+			manager_tel = #{managerTel},
+			validate_code = #{validateCode},
+			manager_email =  #{managerEmail}
+		WHERE manager_id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_region_manager
+		WHERE manager_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_region_manager SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE manager_id = #{ids}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailRegionManager" statementType="STATEMENT">
+		select * FROM retail_region_manager  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

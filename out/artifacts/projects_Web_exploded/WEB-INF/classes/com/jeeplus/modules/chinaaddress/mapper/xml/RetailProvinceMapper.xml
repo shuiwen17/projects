@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.chinaaddress.mapper.RetailProvinceMapper">
+
+         
+	<sql id="provinceColumns">
+		 a.PID as pid,
+		 a.code_p as codeP,
+		 a.ProvinceName as provinceName
+	</sql>
+	 
+	<select id="findProvinces" resultType="RetailProvince" >
+		SELECT 
+			<include refid="provinceColumns"/>
+		FROM retail_province a 
+	</select>
+
+   
+	<sql id="retailProvinceColumns">
+		a.PID AS "pid",
+		a.code_p AS "codeP",
+		a.ProvinceName AS "provincename"
+	</sql>
+	
+	<sql id="retailProvinceJoins">
+		
+	</sql>
+	
+    
+	<select id="get" resultType="RetailProvince" >
+		SELECT 
+			<include refid="retailProvinceColumns"/>
+		FROM retail_province a
+		<include refid="retailProvinceJoins"/>
+		WHERE a.PID = #{id}
+	</select>
+	
+	<select id="findList" resultType="RetailProvince" >
+		SELECT 
+			<include refid="retailProvinceColumns"/>
+		FROM retail_province a
+		<include refid="retailProvinceJoins"/>
+		<where>
+			
+			${dataScope}
+			<if test="pid != null and pid != ''">
+				AND a.PID = #{pid}
+			</if>
+			<if test="codeP != null and codeP != ''">
+				AND a.code_p = #{codeP}
+			</if>
+			<if test="provincename != null and provincename != ''">
+				AND a.ProvinceName = #{provincename}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="RetailProvince" >
+		SELECT 
+			<include refid="retailProvinceColumns"/>
+		FROM retail_province a
+		<include refid="retailProvinceJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_province(
+			PID,
+			code_p,
+			ProvinceName
+		) VALUES (
+			#{pid},
+			#{codeP},
+			#{provincename}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_province SET 				
+			code_p = #{codeP},
+			ProvinceName = #{provincename}
+		WHERE PID = #{pid}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_province
+		WHERE PID = #{pid}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_province SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE PID = #{pid}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailProvince" statementType="STATEMENT">
+		select * FROM retail_province  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

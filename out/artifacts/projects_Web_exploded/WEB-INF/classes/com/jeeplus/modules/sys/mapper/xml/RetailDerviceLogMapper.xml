@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.RetailDerviceLogMapper">
+    <sql id="retailDerviceLogColumns">
+		a.id id,
+		a.dervice_sn,
+		retailDerviceInfo.dervice_name,
+		a.dervice_type,
+		a.user_id,
+		retailUserInfo.mobile_phone,
+		a.logs_description,
+		a.logs_type,
+		a.create_time	
+	</sql>
+    
+    <resultMap id="retailDerviceLogResult" type="retailDerviceLog">
+    	<id property="id" column="id" />
+		<result property="derviceSn" column="dervice_sn" />
+		<result property="derviceName" column="dervice_name" />
+		<result property="derviceType" column="dervice_type" />
+		<result property="userId" column="user_id" />
+		<result property="mobilePhone" column="mobile_phone" />
+		<result property="logsDescription" column="logs_description" />
+		<result property="logsType" column="logs_type" />
+		<result property="createTime" column="create_time" />	
+    </resultMap>
+    
+  
+    <sql id="joins">
+    	LEFT JOIN retail_user_info retailUserInfo	ON retailUserInfo.mobile_phone = a.user_id
+    	LEFT JOIN retail_dervice_info retailDerviceInfo	ON retailDerviceInfo.dervice_sn = a.dervice_sn
+    	LEFT JOIN retail_business_info business ON business.business_id = retailDerviceInfo.business_id	
+	</sql>
+    
+	<select id="findList" parameterType="String" resultMap="retailDerviceLogResult">  
+        select 
+		<include refid="retailDerviceLogColumns"/>
+		from retail_dervice_log a 
+		<include refid="joins"/> 	
+		
+		<where>		
+			<if test="derviceSn != null and derviceSn != ''">
+					AND a.dervice_sn like concat('%',#{derviceSn},'%')
+			</if>
+			<if test="derviceName != null and derviceName != ''">
+					AND retailDerviceInfo.dervice_name like concat('%',#{derviceName},'%')
+			</if>
+			<if test="mobilePhone != null and mobilePhone != ''">
+					AND retailUserInfo.mobile_phone like concat('%',#{mobilePhone},'%')
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null ">
+				AND a.create_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+			${dataScope}
+		</where>
+		ORDER BY a.create_time desc 
+    </select> 
+    
+    
+    <select id="get" resultType="retailDerviceLog" resultMap="retailDerviceLogResult">
+		SELECT 
+			<include refid="retailDerviceLogColumns"/>
+		from retail_dervice_log a 
+			<include refid="joins"/> 
+		WHERE a.id = #{id} 
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_dervice_log(
+			dervice_sn,
+			dervice_type
+			user_id,
+			logs_description,
+			logs_type,
+			create_time
+		) VALUES (
+			#{derviceSn},
+			#{derviceType},
+			#{userId},
+			#{logsDescription},
+			#{logsType},
+			#{createTime},
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_dervice_log SET 	 
+			dervice_type = #{derviceSn},
+			user_id = 	#{userId},
+			logs_description = #{logsDescription},
+			logs_type =#{logsType},
+			create_time = #{createTime}
+		WHERE dervice_sn = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_dervice_log SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE dervice_sn = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="java_backstage">
+    <output-path>$PROJECT_DIR$/java_backstage/target/java_backstage</output-path>
+    <root id="root">
+      <element id="dir-copy" path="$PROJECT_DIR$/java_backstage/src/main/webapp" />
+    </root>
+  </artifact>
+</component>

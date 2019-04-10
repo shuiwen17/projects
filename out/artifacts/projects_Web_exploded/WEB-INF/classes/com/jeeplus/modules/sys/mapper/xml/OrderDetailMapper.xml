@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.OrderDetailMapper">
+    <sql id="queryColumns">
+		a.detail_id ,
+		a.order_sn orderSn,
+		a.goods_id,
+		a.goods_sn,
+		a.goods_name,
+		a.goods_image,
+		a.goods_price,		
+		a.rfid_id,		
+		a.rfid_code,	
+		a.create_time
+	</sql>
+    
+    <resultMap id="queryResult" type="OrderDetail">
+    	<id property="detailId" column="detail_id" /> 
+    	<result property="orderId" column="order_id" />
+		<result property="orderSn" column="order_sn" />
+		<result property="goodsName" column="goods_name" />
+		<result property="goodsPrice" column="goods_price" />
+		<result property="rfidCode" column="rfid_code" />
+		<result property="goodsSn" column="goods_sn" />
+		<result property="goodsImage" column="goods_image" />
+		<result property="rfidId" column="rfid_id" />
+		<result property="rfidCode" column="rfid_code" />
+		<result property="createTime" column="create_time" />
+		<result property="sales" column="COUNT(goods_id)" />
+		<result property="salesPrice" column="COUNT(goods_id)*a.goods_price" />
+    </resultMap>
+    
+   
+    <sql id="joins">
+    	LEFT JOIN retail_order_info retailOrderInfo	ON retailOrderInfo.order_sn = a.order_sn
+    	LEFT JOIN retail_region_info regionInfo ON regionInfo.region_id = retailOrderInfo.region_id
+		LEFT JOIN retail_position_info positionInfo ON positionInfo.position_id = retailOrderInfo.position_id
+		LEFT JOIN retail_business_info business ON business.business_id = retailOrderInfo.business_id
+	</sql>
+    
+	<select id="findList" parameterType="String" resultMap="queryResult">  
+       select 
+		a.`goods_name`,COUNT(goods_id)
+		from retail_order_detail a 
+		<include refid="joins" />
+		
+		WHERE retailOrderInfo.pay_status = 1
+			<if test="goodsName != null and goodsName != ''">
+					AND a.goods_name like concat('%',#{goodsName},'%')
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null ">
+				AND retailOrderInfo.pay_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+			<if test="regionName != null and regionName != ''">
+					AND regionInfo.region_name = #{regionName}
+			</if>
+			<if test="positionName != null and positionName != ''">
+					AND positionInfo.position_name = #{positionName}
+			</if>
+			${dataScope}
+		GROUP BY a.`goods_name` ORDER BY COUNT(goods_id) DESC 
+    </select> 
+    
+   <!--  <select id="findListjiage" parameterType="String" resultMap="queryResult">  
+       select 
+		a.`goods_name`,COUNT(goods_id)*a.`goods_price`,COUNT(goods_id)
+		from retail_order_detail a 
+		LEFT JOIN retail_order_info retailOrderInfo	ON retailOrderInfo.order_sn = a.order_sn
+		LEFT JOIN retail_region_info regionInfo ON regionInfo.region_id = retailOrderInfo.region_id
+		LEFT JOIN retail_position_info positionInfo ON positionInfo.position_id = retailOrderInfo.position_id
+		WHERE retailOrderInfo.pay_status = 1
+		
+		GROUP BY a.`goods_name`, a.`goods_price` ORDER BY COUNT(goods_id)*a.`goods_price` DESC
+    </select> --> 
+
+    <select id="get" resultType="OrderDetail" >
+		select 
+		a.`goods_name`,COUNT(goods_id)
+		from retail_order_detail a 
+		<include refid="joins" />
+		WHERE retailOrderInfo.pay_status = 1
+		
+		GROUP BY a.`goods_name` ORDER BY COUNT(goods_id) DESC 
+	</select>
+
+	
+	<insert id="insert">
+		INSERT INTO retail_order_detail(
+			detail_id,
+			order_sn,
+			goods_id,
+			goods_sn,
+			goods_name,
+			goods_image,
+			goods_price,		
+			rfid_id,		
+			rfid_code,	
+			create_time,
+			del_flg
+		) VALUES (
+			#{detailId},
+			#{orderSn},
+			#{goodsId},
+			#{goodsSn},
+			#{goodsName},
+			#{goodsImage},
+			#{goodsPrice},						
+			#{rfidId},
+			#{rfidCode},
+			#{createTime},
+			#{DEL_FLAG_NORMAL}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_order_detail SET		
+			order_sn = #{orderSn},
+			goods_id =#{goodsId},
+			goods_sn = #{goodsSn},
+			goods_name = #{goodsName},
+			goods_image = #{goodsImage},
+			goods_price = #{goodsPrice},
+			rfid_id = #{rfidId},
+			rfid_code = #{rfidCode},						
+		WHERE detail_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="delete">
+		UPDATE retail_order_detail SET 
+			del_flg = #{DEL_FLAG_DELETE}
+		WHERE detail_id = #{id}
+	</update>
+</mapper>

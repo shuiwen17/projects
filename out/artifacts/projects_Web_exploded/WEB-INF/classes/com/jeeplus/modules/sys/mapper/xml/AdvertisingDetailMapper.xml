@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.AdvertisingDetailMapper">
+    
+	<sql id="advertisingDetailColumns">
+		a.detail_id AS "id",
+		a.dervice_sn AS "derviceSn",
+		a.advertising_id AS "advertisingId",
+		a.advertising_name AS "advertisingName",
+		a.advertising_image AS "advertisingImage",
+		a.create_time AS "createTime",
+		a.del_flg AS "delFlag"
+	</sql>
+	
+	<sql id="advertisingDetailJoins">
+		LEFT JOIN retail_dervice_info dervice ON dervice.dervice_sn = a.dervice_sn
+	</sql>
+	
+    
+	<select id="get" resultType="AdvertisingDetail" >
+		SELECT 
+			<include refid="advertisingDetailColumns"/>
+		FROM retail_dervice_advertising a
+		<include refid="advertisingDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AdvertisingDetail" >
+		SELECT 
+			<include refid="advertisingDetailColumns"/>
+		FROM retail_dervice_advertising a
+		<include refid="advertisingDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="AdvertisingDetail" >
+		SELECT 
+			<include refid="advertisingDetailColumns"/>
+		FROM retail_dervice_advertising a
+		<include refid="advertisingDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_time ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_dervice_advertising(
+			detail_id,
+			dervice_sn,
+			advertising_id,
+			advertising_name,
+			advertising_image,
+			create_time,
+			del_flg
+		) VALUES (
+			#{id},
+			#{derviceSn},
+			#{advertisingId},
+			#{advertisingName},
+			#{advertisingImage},
+			#{createTime},
+			#{delFlag}		
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_dervice_advertising SET 	
+			dervice_sn = #{derviceSn},
+			advertising_id = #{advertisingId},
+			advertising_name = #{advertisingName},
+			advertising_image = #{advertisingImage},
+			create_time = #{createTime},
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_dervice_advertising
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_dervice_advertising SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="AdvertisingDetail" statementType="STATEMENT">
+		select * FROM sys_dict_value  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

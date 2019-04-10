@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.marketing.mapper.RetailUserDiscountMapper">
+    
+	<sql id="retailUserDiscountColumns">
+		a.id ,
+		a.discount_name ,
+		a.discount_type ,
+		
+		a.discount_from ,
+		a.discount_expiry ,
+		a.user_mobile ,
+		a.discount_amount ,
+		a.achieve_amount ,
+		a.discount_rate,
+		a.discount_describe ,
+		a.use_status , 
+		a.use_time  ,
+		a.create_time ,
+		a.del_flg 
+	</sql>
+	
+	<resultMap id="RetailUserDiscountResult" type="RetailUserDiscount">
+    	<id property="id" column="id" />
+		<result property="discountName" column="discount_name" />
+		<result property="discountType" column="discount_type" />
+		<result property="discountFrom" column="discount_from" />
+		<result property="discountExpiry" column="discount_expiry" />
+		<result property="userMobile" column="user_mobile" />
+		<result property="discountAmount" column="discount_amount" />
+		<result property="achieveAmount" column="achieve_amount" />
+		<result property="discountRate" column="discount_rate" />
+		<result property="discountDescribe" column="discount_describe" />
+		<result property="useStatus" column="use_status" />
+		<result property="useStateName" column="use_state_name" />
+		<result property="useTime" column="use_time" />
+		<result property="createTime" column="create_time" />
+		<result property="delFlg" column="del_flg" />
+    </resultMap>
+	
+	<sql id="retailUserDiscountJoins">
+		INNER JOIN retail_user_Info u ON u.mobile_phone = a.user_mobile
+		INNER JOIN retail_business_info g on u.business_id = g.business_id
+	</sql>
+	
+    
+	<select id="get" resultType="RetailUserDiscount" resultMap="RetailUserDiscountResult">
+		SELECT 
+			<include refid="retailUserDiscountColumns"/>
+		FROM retail_user_discount a
+		<include refid="retailUserDiscountJoins"/>
+		WHERE a.id = #{id} ORDER BY a.create_time DESC 
+	</select>
+	
+	<select id="findList" resultType="RetailUserDiscount" resultMap="RetailUserDiscountResult">
+		SELECT 
+			<include refid="retailUserDiscountColumns"/>
+		FROM retail_user_discount a
+		<include refid="retailUserDiscountJoins"/>
+		<where>
+			${dataScope}
+			<if test="userMobile != null and userMobile != ''">
+				AND a.user_mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{userMobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{userMobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{userMobile},'%')</if>
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null ">
+				AND a.use_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		 ORDER BY a.create_time DESC 
+	</select>
+	
+	<select id="findAllList" resultType="RetailUserDiscount" resultMap="RetailUserDiscountResult">
+		SELECT 
+			<include refid="retailUserDiscountColumns"/>
+		FROM retail_user_discount a
+		<include refid="retailUserDiscountJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		 ORDER BY a.create_time DESC 
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_user_discount(
+			id,
+			discount_name,
+			discount_type,
+			discount_from,
+			discount_expiry,
+			user_mobile,
+			discount_amount,
+			achieve_amount,
+			discount_rate,
+			discount_describe,
+			use_status,
+			use_time,
+			create_time,
+			del_flg
+		) VALUES (
+			#{id},
+			#{discountName},
+			#{discountType},
+			#{discountFrom},
+			#{discountExpiry},
+			#{userMobile},
+			#{discountAmount},
+			#{userMobile},
+			#{discountAmount},
+			#{achieveAmount},
+			#{discountRate},
+			#{discountDescribe},
+			#{useStatus},
+			#{useTime},
+			#{createTime},
+			#{delFlg}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_user_discount SET 	
+			id = #{id},
+			discount_name = #{discountName},
+			discount_type = #{discountType},
+			discount_from = #{discountFrom},
+			discount_expiry = #{discountExpiry},
+			user_mobile = #{userMobile},
+			<if test="discountAmount != null and discountAmount != ''">
+			discount_amount = #{discountAmount},
+			</if>
+			<if test="achieveAmount != null and achieveAmount != ''">
+			achieve_amount = #{achieveAmount},
+			</if>
+			<if test="discountRate != null and discountRate != ''">
+			discount_rate = #{discountRate},
+			</if>
+			discount_describe = #{discountDescribe},
+			use_status = #{useStatus},			
+			create_time = #{createTime},
+			del_flg = #{delFlg}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_user_discount
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_user_discount SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+
+	
+</mapper>

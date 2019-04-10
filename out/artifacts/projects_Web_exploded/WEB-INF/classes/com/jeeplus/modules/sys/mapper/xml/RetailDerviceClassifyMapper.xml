@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.RetailDerviceClassifyMapper">
+    
+    <sql id="queryColumns">
+		classify_id id,
+		classify_name,
+		classify_describe,
+		date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time,
+		del_flag
+	</sql>
+    
+    <resultMap id="queryResult" type="RetailDerviceClassify">
+    	<id property="id" column="id" />
+		<result property="classifyName" column="classify_name" />
+		<result property="createDate" column="create_time" />
+		<result property="delFlag" column="del_flag" />
+		<result property="classifyDescribe" column="classify_describe" />
+    </resultMap>
+    
+	<select id="findList" parameterType="String" resultMap="queryResult">  
+        select 
+		<include refid="queryColumns"/>
+		from retail_dervice_classify 
+		where
+		 del_flag != #{DEL_FLAG_DELETE}
+		 	<if test="classifyName != null and classifyName != ''">
+				AND classify_name like concat('%',#{classifyName},'%')
+			</if> 
+		 ORDER BY create_time desc 
+    </select> 
+    
+    <select id="get" resultType="RetailDerviceClassify" >
+		SELECT 
+			<include refid="queryColumns"/>
+		FROM retail_dervice_classify a
+		WHERE a.classify_id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_dervice_classify(
+			classify_name,
+			classify_describe,
+			create_time,
+			del_flag 
+		) VALUES (
+			#{classifyName},
+			#{classifyDescribe},
+			#{createDate},
+			#{DEL_FLAG_NORMAL}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_dervice_classify SET 	
+			classify_name = #{classifyName},
+			classify_describe = #{classifyDescribe}
+		WHERE classify_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_dervice_classify SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE classify_id = #{id}
+	</update>
+</mapper>

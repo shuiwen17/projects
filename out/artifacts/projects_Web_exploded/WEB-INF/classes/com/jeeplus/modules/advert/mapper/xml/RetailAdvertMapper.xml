@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.advert.mapper.RetailAdvertMapper">
+    
+    <resultMap id="BaseResult" type="com.jeeplus.modules.advert.entity.RetailAdvert">
+		<id property="advertId" column="advert_id" jdbcType="INTEGER"/>
+		<result property="name" column="advert_name" jdbcType="VARCHAR"/>
+		<result property="note" column="advert_note" jdbcType="VARCHAR"/>
+		<result property="imgUrl" column="advert_img_url" jdbcType="VARCHAR"/>
+		<result property="createTime" column="advert_create_time" jdbcType="TIMESTAMP"/>
+		<result property="status" column="advert_status" jdbcType="INTEGER"/>
+		<result property="createrId" column="advert_creater_id" jdbcType="VARCHAR"/>
+		<result property="createrName" column="advert_creater_name" jdbcType="VARCHAR"/>
+		<result property="publishTime" column="advert_publish_time" jdbcType="TIMESTAMP"/>
+	</resultMap>
+    <sql id="advertColumns">
+		 advert_id,advert_name,advert_note,advert_img_url,advert_create_time,advert_status,advert_creater_id,advert_creater_name,advert_publish_time
+	</sql>
+	 
+	<select id="get" resultMap="BaseResult">
+		select
+	  	<include refid="advertColumns"/>
+	  	from retail_advert
+	  	where advert_id = #{advertId}
+	</select>
+
+	<select id="findList" resultMap="BaseResult">
+		SELECT
+		<include refid="advertColumns"/>
+		FROM retail_advert
+		<where>
+			<if test="name != null and name != ''">
+				AND advert_name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="status != null and status !=''">
+				and advert_status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				order by retail_advert.advert_create_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResult">
+		SELECT
+		<include refid="advertColumns"/>
+		FROM retail_advert
+		<where>
+			<if test="name != null and name != ''">
+				AND advert_name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="status != null and status !=''">
+				and advert_status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			order by advert_create_time desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO retail_advert
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null and name != ''">
+				advert_name,
+			</if>
+			<if test="note != null and note != ''">
+				advert_note,
+			</if>
+			<if test="imgUrl != null and imgUrl != ''">
+				advert_img_url,
+			</if>
+			<if test="status != null and status !=''">
+				advert_status,
+			</if>
+			<if test="createTime != null and createTime != ''">
+				advert_create_time,
+			</if>
+			<if test="createrId != null and createrId != ''">
+				advert_creater_id,
+			</if>
+			<if test="createrName != null and createrName != ''">
+				advert_creater_name,
+			</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="name != null and name != ''">
+				#{name},
+			</if>
+			<if test="note != null and note != ''">
+				#{note},
+			</if>
+			<if test="imgUrl != null and imgUrl != ''">
+				#{imgUrl},
+			</if>
+			<if test="status != null and status !=''">
+				#{status},
+			</if>
+			<if test="createTime != null and createTime != ''">
+				#{createTime},
+			</if>
+			<if test="createrId != null and createrId != ''">
+				#{createrId},
+			</if>
+			<if test="createrName != null and createrName != ''">
+				#{createrName},
+			</if>
+		</trim>
+	</insert>
+
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into retail_advert(advert_name,advert_note,advert_img_url,advert_status,advert_creater_id,advert_creater_name)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.name},#{item.note},#{item.imgUrl},#{item.status},#{item.createrId},#{item.createrName})
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE retail_advert
+		<set>
+			<trim suffixOverrides=",">
+				<if test="name != '' and name != null">
+					advert_name = #{name},
+				</if>
+				<if test="note != '' and note != null">
+					advert_note = #{note},
+				</if>
+				<if test="imgUrl != '' and imgUrl !=null">
+					advert_img_url = #{imgUrl},
+				</if>
+				<if test="createTime != '' and createTime != null">
+					advert_create_time = #{createTime},
+				</if>
+				<if test="status != null and status != ''">
+					advert_status = #{status},
+				</if>
+				<if test="createrId != null and createrId != ''">
+					advert_creater_id = #{createrId},
+				</if>
+				<if test="createrName != null and createrName != ''">
+					advert_creater_name = #{createrName},
+				</if>
+			</trim>
+		</set>
+		WHERE advert_id = #{advertId}
+	</update>
+
+	<update id="delete">
+		UPDATE retail_advert
+		set advert_status = #{status}
+		WHERE advert_id = #{advertId}
+	</update>
+
+	<delete id="deleteBatch" parameterType="java.util.List">
+		update retail_advert
+		set advert_status = 3
+		where advert_id in
+		<foreach collection="list" item = "advert" open="(" close=")" separator=",">
+			#{advert.advertId}
+		</foreach>
+	</delete>
+</mapper>

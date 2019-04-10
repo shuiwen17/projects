@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.GoodsTypeMapper">
+    
+    <sql id="goodsTypeColumns">
+		a.type_id as "id",
+		a.parent_id as "parent.id",
+		a.type_name as "name",
+		parent.type_name as "parent.Name",
+		parent.type_name as "parent.typeName",
+		a.type_name as "typeName",
+		a.parent_ids as "parentIds",
+		a.create_user_name as "createBy.name",
+		date_format(a.create_time,'%Y-%m-%d %H:%i:%s') as "createDate"
+	</sql>
+    
+    <resultMap id="goodsTypeResult" type="GoodsType">
+    	<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="parentName" column="parent.typeName" />
+		<association property="hasChildren" column="id" select="hasChildren" />
+    </resultMap>
+    
+	<select id="findList" parameterType="String" resultMap="goodsTypeResult">  
+        select 
+		<include refid="goodsTypeColumns"/>
+		from retail_goods_type a
+		left join retail_goods_type  parent on a.parent_id = parent.type_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="parentIds != null and parentIds != ''">
+				AND a.parent_ids LIKE concat('%',#{parentIds},'%')
+			</if>
+			<if test="typeName != null and typeName != ''">
+				AND a.type_name like concat('%',#{typeName},'%')
+			</if>
+		</where>
+    </select> 
+    
+    <select id="get" resultType="GoodsType" resultMap="goodsTypeResult">
+		SELECT 
+			<include refid="goodsTypeColumns"/>
+		FROM retail_goods_type a
+		left join retail_goods_type  parent on a.parent_id = parent.type_id
+		WHERE a.type_id = #{id}
+	</select>
+	
+	<select id="hasChildren" parameterType="String" resultType="Boolean">
+        select case when exists (select 1 from retail_goods_type where parent_id = #{id}) then 1 else 0 end ${dual}
+    </select>
+    
+    <select id="findByParentIdsLike" resultType="GoodsType">
+    	SELECT 
+			a.type_id as "id",
+			a.parent_id AS "parent.id",
+			a.parent_ids
+		FROM retail_goods_type a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.parent_ids LIKE #{parentIds}
+		</where>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_goods_type(
+			parent_id,
+			type_name,
+			create_time,
+			create_user_name,
+			parent_ids,
+			del_flag 
+		) VALUES (
+			#{parent.id},
+			#{name},
+			#{createDate},
+			#{createBy.name},
+			#{parentIds},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_goods_type SET 	
+			type_name = #{name},
+			create_user_name = #{createBy.name},
+			parent_id = #{parent.id},
+			del_flag = #{delFlag}
+		WHERE type_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="delete">
+		UPDATE retail_goods_type SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE type_id = #{id}
+	</update>
+</mapper>

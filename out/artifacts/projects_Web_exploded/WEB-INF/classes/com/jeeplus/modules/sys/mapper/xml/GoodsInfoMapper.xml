@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.mapper.GoodsInfoMapper">
+    <sql id="goodsInfoColumns">
+		goods_id id,
+		goods_name,
+		simple_name,
+		sale_state,
+		if(sale_state='1','销售中','下架') sale_state_name,
+		goods_image,
+		goods_price,
+		discount_price,
+		discount_use,
+		virtual_flag,
+		virtual_count,
+		virtual_duration,
+		goods_unit,
+		goods_brand,
+		goods_net,
+		case_quantity,
+		goods_manufactor,
+		goods_describe,
+		goods_sn,
+		date_format(a.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+		a.create_user_name,
+		a.type_id,
+		type.type_name
+	</sql>
+    
+    <resultMap id="goodsInfoResult" type="GoodsInfo">
+    	<id property="id" column="goods_id" />
+		<result property="goodsName" column="goods_name" />
+		<result property="simpleName" column="simple_name" />
+		<result property="saleState" column="sale_state" />
+		<result property="saleStateName" column="sale_state_name" />
+		<result property="goodsImage" column="goods_image" />
+		<result property="goodsPrice" column="goods_price" />
+		<result property="discountPrice" column="discount_price" />
+		<result property="discountUse" column="discount_use" />
+		<result property="virtualFlag" column="virtual_flag" />
+		<result property="virtualCount" column="virtual_count" />
+		<result property="virtualDuration" column="virtual_duration" />
+		<result property="goodsUnit" column="goods_unit" />
+		<result property="goodsBrand" column="goods_brand" />
+		<result property="goodsNet" column="goods_net" />
+		<result property="caseQuantity" column="case_quantity" />
+		<result property="goodsManufactor" column="goods_manufactor" />
+		<result property="goodsDescribe" column="goods_describe" />
+		<result property="goodsSn" column="goods_sn" />
+		<result property="createTime" column="create_time" />
+		<result property="createUserName" column="create_user_name" />
+		<result property="typeId" column="type_id" />
+		<result property="typeName" column="type_name" />
+    </resultMap>
+    
+	<select id="findList" parameterType="String" resultMap="goodsInfoResult">  
+        select 
+        <include refid="goodsInfoColumns"/>
+        from retail_goods_info a 
+        left join retail_goods_type type on type.type_id = a.type_id 
+       WHERE  a.del_flag != #{DEL_FLAG_DELETE} 
+       			<if test="goodsName != null and goodsName != ''">
+					AND a.goods_name like concat('%',#{goodsName},'%')
+				</if>
+        ORDER BY a.create_time desc 
+    </select> 
+    
+   <!-- 根据商品名称查询商品信息
+	<select id="getByGoodsInfoName" resultType="GoodsInfo" parameterType="GoodsInfo">
+		SELECT
+			<include refid="goodsInfoColumns"/>
+		FROM retail_goods_info a
+		
+		WHERE a.goods_name like 
+					<if test="dbName == 'oracle'">'%'||#{goodsName}||'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{goodsName}, '%')</if>
+					<if test="dbName == 'mssql'">'%'+#{goodsName}+'%'</if> 
+					AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>| -->
+    
+    <select id="get" resultType="GoodsInfo" resultMap="goodsInfoResult">
+		SELECT 
+			<include refid="goodsInfoColumns"/>
+		from retail_goods_info a 
+        left join retail_goods_type type on type.type_id = a.type_id 
+		WHERE a.goods_id = #{id}  
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO retail_goods_info 
+    	<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="goodsName != null and goodsName != ''">
+				goods_name,
+			</if>
+			<if test="simpleName != null and simpleName != ''">
+				simple_name,
+			</if>
+			<if test="saleState != null and saleState != ''">
+			sale_state,
+			</if> 
+			<if test="goodsPrice != null and goodsPrice != ''">
+			goods_price,
+			</if>
+			<if test="discountPrice != null and discountPrice != ''">
+			discount_price,
+			</if>
+			<if test="discountUse != null and discountUse != ''">
+			discount_use,
+			</if>
+			<if test="virtualFlag != null and virtualFlag != ''">
+			virtual_flag,
+			</if>
+			<if test="virtualCount != null and virtualCount != ''">
+			virtual_count,
+			</if>
+			<if test="virtualDuration != null and virtualDuration != ''">
+			virtual_duration,
+			</if>
+			<if test="goodsUnit != null and goodsUnit != ''">
+			goods_unit,
+			</if>
+			<if test="goodsBrand != null and goodsBrand != ''">
+			goods_brand,
+			</if>
+			<if test="goodsNet != null and goodsNet != ''">
+			goods_net,
+			</if>
+			<if test="caseQuantity != null and caseQuantity != ''">
+			case_quantity,
+			</if>
+			<if test="goodsManufactor != null and goodsManufactor != ''">
+			goods_manufactor,
+			</if>
+			<if test="goodsDescribe != null and goodsDescribe != ''">
+			goods_describe,
+			</if>
+			<if test="goodsSn != null and goodsSn != ''">
+			goods_sn,
+			</if>
+			<if test="createDate != null and createDate != ''">
+			create_time,
+			</if>
+			<if test="createBy.name != null and createBy.name != ''">
+			create_user_name,
+			</if>
+			<if test="DEL_FLAG_NORMAL != null and DEL_FLAG_NORMAL != ''">
+			del_flag,
+			</if>
+			<if test="typeId != null and typeId != ''">
+			type_id,
+			</if>
+			<if test="goodsImage != null and goodsImage != ''">
+			goods_image,
+			</if>
+		 </trim>
+    	 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="goodsName != null and goodsName != ''">
+				#{goodsName},
+			</if>
+			<if test="simpleName != null and simpleName != ''">
+			#{simpleName},
+			</if>
+			<if test="saleState != null and saleState != ''">
+			#{saleState},
+			</if>
+			<if test="goodsPrice != null and goodsPrice != ''">
+			#{goodsPrice},
+			</if>
+			<if test="discountPrice != null and discountPrice != ''">
+			#{discountPrice},
+			</if>
+			<if test="discountUse != null and discountUse != ''">
+			#{discountUse},
+			</if>
+			<if test="virtualFlag != null and virtualFlag != ''">
+			#{virtualFlag},
+			</if>
+			<if test="virtualCount != null and virtualCount != ''">
+			${virtualCount},
+			</if>
+			<if test="virtualDuration != null and virtualDuration != ''">
+			#{virtualDuration},
+			</if>
+			<if test="goodsUnit != null and goodsUnit != ''">
+			#{goodsUnit},
+			</if>
+			<if test="goodsBrand != null and goodsBrand != ''">
+			#{goodsBrand},
+			</if>
+			<if test="goodsNet != null and goodsNet != ''">
+			#{goodsNet},
+			</if>
+			<if test="caseQuantity != null and caseQuantity != ''">
+			#{caseQuantity},
+			</if>
+			<if test="goodsManufactor != null and goodsManufactor != ''">
+			#{goodsManufactor},
+			</if>
+			<if test="goodsDescribe != null and goodsDescribe != ''">
+			#{goodsDescribe},
+			</if>
+			<if test="goodsSn != null and goodsSn != ''">
+			#{goodsSn},
+			</if>
+			<if test="createDate != null and createDate != ''">
+			#{createDate},
+			</if>
+			<if test="createBy.name != null and createBy.name != ''">
+			#{createBy.name},
+			</if>
+			<if test="DEL_FLAG_NORMAL != null and DEL_FLAG_NORMAL != ''">
+			#{DEL_FLAG_NORMAL},
+			</if>
+			<if test="typeId != null and typeId != ''">
+			#{typeId},
+			</if>
+			<if test="goodsImage != null and goodsImage != ''">
+			#{goodsImage},	
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_goods_info 
+			<set>
+			<if test="goodsName != null and goodsName != ''">
+			goods_name = #{goodsName},
+			</if>
+			<if test="simpleName != null and simpleName != ''">
+			simple_name = #{simpleName},
+			</if>
+			<if test="saleState != null and saleState != ''">
+			sale_state = #{saleState},
+			</if>
+			<if test="goodsPrice != null and goodsPrice != ''">
+			goods_price = #{goodsPrice},
+			</if>
+			<if test="discountPrice != null and discountPrice != ''">
+			discount_price = #{discountPrice},
+			</if>
+			<if test="discountUse != null and discountUse != ''">
+			discount_use = #{discountUse},
+			</if>
+			<if test="virtualFlag != null and virtualFlag != ''">
+			virtual_flag = #{virtualFlag},
+			</if>
+			<if test="virtualCount != null and virtualCount != ''">
+			virtual_count = #{virtualCount},
+			</if>
+			<if test="virtualDuration != null and virtualDuration != ''">
+			virtual_duration = #{virtualDuration},
+			</if>
+			<if test="goodsUnit != null and goodsUnit != ''">
+			goods_unit = #{goodsUnit},
+			</if>
+			<if test="goodsBrand != null and goodsBrand != ''">
+			goods_brand = #{goodsBrand},
+			</if>
+			<if test="goodsNet != null and goodsNet != ''">
+			goods_net = #{goodsNet},
+			</if>
+			<if test="caseQuantity != null and caseQuantity != ''">
+			case_quantity = #{caseQuantity},
+			</if>
+			<if test="goodsManufactor != null and goodsManufactor != ''">
+			goods_manufactor = #{goodsManufactor},
+			</if>
+			<if test="goodsDescribe != null and goodsDescribe != ''">
+			goods_describe = #{goodsDescribe},
+			</if>
+			<if test="goodsSn != null and goodsSn != ''">
+			goods_sn = #{goodsSn},
+			</if>
+			<if test="typeId != null and typeId != ''">
+			type_id = #{typeId} ,
+			</if>
+			<if test="goodsImage != null and goodsImage != ''">
+			goods_image =#{goodsImage},
+			</if>
+			</set>
+		WHERE goods_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="delete">
+		UPDATE retail_goods_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE  goods_id= #{id}
+	</update>
+</mapper>

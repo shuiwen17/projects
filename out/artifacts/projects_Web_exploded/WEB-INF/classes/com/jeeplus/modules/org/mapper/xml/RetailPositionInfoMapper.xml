@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.org.mapper.RetailPositionInfoMapper">
+    
+    <sql id="dataColumns">			
+		a.position_id AS "id",
+		a.position_name AS "positionName",
+		a.position_describe AS "positionDescribe",
+		a.province_id AS "provinceId",
+		d.ProvinceName AS "provinceName",
+		a.city_id AS "cityId",
+		e.CityName AS "cityName",
+		a.district_id AS "districtId",
+		f.DistrictName AS "districtName",
+		a.address AS "address",
+		a.region_id	 AS "regionId",
+		b.region_name AS "regionName",
+		a.type_id AS "typeId",
+		c.type_name AS "typeName",
+		a.create_time AS "createDate",
+		a.del_flag AS "delFlag"
+	</sql>
+    
+	<sql id="retailJoins">
+		 INNER JOIN retail_region_info b ON a.region_id = b.region_id 
+		 INNER JOIN retail_business_info g on g.business_id = b.business_id 
+		 INNER JOIN retail_position_type c ON a.type_id = c.type_id 
+		 LEFT JOIN retail_province d ON d.PID = a.province_id 
+		 LEFT JOIN retail_city e ON e.CID = a.city_id
+		 LEFT JOIN retail_district f ON F.DID = a.district_id 
+	</sql>
+	
+	<select id="findList" resultType="RetailPositionInfo" >
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_position_info a
+		<include refid="retailJoins"/>
+		<where>
+			${dataScope}
+			<if test="positionName != null and positionName != ''">
+				AND a.position_name LIKE CONCAT('%',#{positionName},'%') 
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select> 
+	<select id="get" resultType="RetailPositionInfo">
+		SELECT 
+			<include refid="dataColumns"/>
+		FROM retail_position_info a
+			<include refid="retailJoins"/>
+		WHERE 	position_id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_position_info(   
+			position_name,
+			position_describe,
+			province_id,
+			city_id,
+			<if test="districtId != null and districtId != ''">
+			district_id,
+			</if>
+			address,
+			region_id,
+			type_id,
+			create_time,
+			del_flag
+		) VALUES ( 
+			#{positionName},
+			#{positionDescribe},
+			#{provinceId}, 
+			#{cityId},
+			<if test="districtId != null and districtId != ''">
+			#{districtId},
+			</if>
+			#{address},
+			#{regionId},
+			#{typeId},
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_position_info SET  	  
+			position_name = #{positionName},
+			position_describe = #{positionDescribe},
+			province_id = #{provinceId}, 
+			city_id = #{cityId},
+			<if test="districtId != null and districtId != ''">
+			district_id = #{districtId},
+			</if>
+			address = #{address},
+			region_id = #{regionId},
+			type_id  = #{typeId}
+		WHERE position_id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_position_info
+		WHERE position_id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_position_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE position_id = #{ids}
+	</update>	
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailPositionInfo" statementType="STATEMENT">
+		select * FROM retail_position_info  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

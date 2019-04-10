@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.chinaaddress.mapper.RetailDistrictMapper">
+    
+    <sql id="districtColumns">
+		 a.DID as did,
+		 a.DistrictName as districtName,		
+		 a.code_d as codeD,
+		 a.code_c as codeC
+	</sql>
+	
+	<select id="findDistrictsByCid" resultType="RetailDistrict" >
+		SELECT 
+			<include refid="districtColumns"/>
+		FROM retail_district a 
+		WHERE a.code_c=#{codeC}
+	</select>
+    
+    
+	<sql id="retailDistrictColumns">
+		a.did AS "did",
+		a.districtname AS "districtname",
+		a.code_d as "codeD",
+		a.code_c as "codeC"
+	</sql>
+	
+	<sql id="retailDistrictJoins">
+		
+	</sql>
+	
+    
+	<select id="get" resultType="RetailDistrict" >
+		SELECT 
+			<include refid="retailDistrictColumns"/>
+		FROM retail_district a
+		<include refid="retailDistrictJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="RetailDistrict" >
+		SELECT 
+			<include refid="retailDistrictColumns"/>
+		FROM retail_district a
+		<include refid="retailDistrictJoins"/>
+		<where>
+			
+			${dataScope}
+			<if test="did != null and did != ''">
+				AND a.did = #{did}
+			</if>
+			<if test="districtname != null and districtname != ''">
+				AND a.districtname = #{districtname}
+			</if>
+			<if test="codeC != null and codeC != ''">
+				AND a.code_c = #{codeC}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="RetailDistrict" >
+		SELECT 
+			<include refid="retailDistrictColumns"/>
+		FROM retail_district a
+		<include refid="retailDistrictJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO retail_district(
+			did,
+			districtname,
+			code_d,
+			code_c
+		) VALUES (
+			#{did},
+			#{districtname},
+			#{codeD},
+			#{codeC}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE retail_district SET 	
+			did = #{did},
+			districtname = #{districtname},
+			code_d = #{codeD},
+			code_c = #{codeC}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM retail_district
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE retail_district SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="RetailDistrict" statementType="STATEMENT">
+		select * FROM retail_district  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
